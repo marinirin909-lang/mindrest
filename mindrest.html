@@ -578,6 +578,49 @@
 
   /* RESPONSIVE MAX WIDTH */
   .app-inner { max-width: 430px; margin: 0 auto; position: relative; }
+
+  /* SETTINGS SECTION */
+  .settings-section {
+    margin: 0 24px 24px;
+  }
+  .settings-links {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .settings-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: var(--white);
+    border: none;
+    border-radius: 16px;
+    font-size: 14px;
+    color: var(--text);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(61, 90, 104, 0.06);
+  }
+  .settings-link:hover {
+    background: var(--sage-pale);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 20px rgba(61, 90, 104, 0.12);
+  }
+  .settings-link span:first-child {
+    font-size: 18px;
+    margin-right: 12px;
+  }
+  .settings-link span:nth-child(2) {
+    flex: 1;
+    text-align: left;
+    font-weight: 500;
+  }
+  .settings-link span:last-child {
+    color: var(--text-muted);
+    font-size: 16px;
+  }
 </style>
 </head>
 <body>
@@ -689,6 +732,24 @@
           <div class="featured-play">
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M3 2l9 5-9 5V2z" fill="white"/></svg>
             Begin Session
+          </div>
+        </div>
+
+        <div class="settings-section">
+          <div class="section-header">
+            <span class="section-title">Settings</span>
+          </div>
+          <div class="settings-links">
+            <button class="settings-link" onclick="openPrivacyPolicy()">
+              <span>📋</span>
+              <span>Privacy Policy</span>
+              <span>→</span>
+            </button>
+            <button class="settings-link" onclick="openTermsOfService()">
+              <span>📜</span>
+              <span>Terms of Service</span>
+              <span>→</span>
+            </button>
           </div>
         </div>
 
@@ -1268,6 +1329,15 @@
     t.classList.add('show');
     clearTimeout(toastTimeout);
     toastTimeout = setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  // ─── Privacy Policy & Terms of Service ───────────────────────
+  function openPrivacyPolicy() {
+    window.open('https://mindrest.mindpilot.online/privacy-policy', '_blank', 'noopener,noreferrer');
+  }
+
+  function openTermsOfService() {
+    window.open('https://mindrest.mindpilot.online/terms-of-service', '_blank', 'noopener,noreferrer');
   }
 </script>
 </body>
