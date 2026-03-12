@@ -28,6 +28,77 @@
   --white: #fefdfb;
 }
 
+/* Dark Mode Variables */
+[data-theme="dark"] {
+  --ink: #e8f0f8;
+  --deep: #c8d8e8;
+  --ocean: #4a6f8f;
+  --dusk: #5a6a7a;
+  --sky: #4a7f9f;
+  --mist: #3a5f7f;
+  --sage: #5a7a6a;
+  --sage-light: #4a6a5a;
+  --sage-pale: #3a5a4a;
+  --cream: #1a2a3a;
+  --paper: #0a1a2a;
+  --gold: #8a7a5a;
+  --gold-light: #6a5a4a;
+  --blush: #5a4a3a;
+  --white: #0a1a2a;
+}
+
+/* Theme Toggle Styles */
+.theme-toggle {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 1000;
+  background: var(--white);
+  border: 1px solid var(--sage-pale);
+  border-radius: 30px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.theme-toggle:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+.theme-toggle-icon {
+  font-size: 18px;
+  transition: transform 0.3s ease;
+}
+.theme-toggle:hover .theme-toggle-icon {
+  transform: rotate(20deg);
+}
+.theme-toggle-text {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--ink);
+}
+
+/* Subtitle Styles */
+.app-subtitle {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--dusk);
+  opacity: 0.8;
+  transition: all 0.3s ease;
+}
+.app-subtitle:hover {
+  opacity: 1;
+  color: var(--ink);
+}
+
 html { scroll-behavior: smooth; overflow-x: hidden; }
 
 body {
@@ -514,6 +585,13 @@ footer { background: #111d23; padding: 60px 60px 40px; }
 </style>
 </head>
 <body>
+
+<!-- Theme Toggle and Subtitle -->
+<div class="app-subtitle">MindRest — Find Your Calm</div>
+<button class="theme-toggle" onclick="toggleTheme()">
+  <span class="theme-toggle-icon">🌙</span>
+  <span class="theme-toggle-text">Dark Mode</span>
+</button>
 
 <!-- CURSOR -->
 <div id="cursor"></div>
@@ -1076,6 +1154,41 @@ window.addEventListener('scroll', () => {
   const phone = document.querySelector('.hero-phone-wrap');
   if (phone) phone.style.transform = `translateY(${sy * 0.08}px)`;
 });
+
+// ─── Theme Toggle ─────────────────────────────────────────
+function toggleTheme() {
+  const html = document.documentElement;
+  const themeToggle = document.querySelector('.theme-toggle');
+  const themeIcon = themeToggle.querySelector('.theme-toggle-icon');
+  const themeText = themeToggle.querySelector('.theme-toggle-text');
+  
+  if (html.getAttribute('data-theme') === 'dark') {
+    html.removeAttribute('data-theme');
+    themeIcon.textContent = '🌙';
+    themeText.textContent = 'Dark Mode';
+    localStorage.setItem('theme', 'light');
+  } else {
+    html.setAttribute('data-theme', 'dark');
+    themeIcon.textContent = '☀️';
+    themeText.textContent = 'Light Mode';
+    localStorage.setItem('theme', 'dark');
+  }
+}
+
+// Initialize theme on load
+function initializeTheme() {
+  const savedTheme = localStorage.getItem('theme');
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+  
+  if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    document.querySelector('.theme-toggle-icon').textContent = '☀️';
+    document.querySelector('.theme-toggle-text').textContent = 'Light Mode';
+  }
+}
+
+// Initialize theme on page load
+initializeTheme();
 </script>
 </body>
 </html>
