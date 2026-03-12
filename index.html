@@ -1293,8 +1293,64 @@
 
   // ─── Player ───────────────────────────────────────────────
   let isPlaying = false;
+  let currentAudio = null;
+  let audioContext = null;
+
+  // Initialize audio context on first user interaction
+  function initAudioContext() {
+    if (!audioContext) {
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    }
+  }
+
+  // Create placeholder audio using Web Audio API
+  function createPlaceholderSound(type) {
+    initAudioContext();
+    
+    // Create oscillator for simple sound generation
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    // Different sound types
+    switch(type) {
+      case 'meditation':
+        oscillator.frequency.value = 432; // Meditation frequency
+        gainNode.gain.value = 0.1;
+        break;
+      case 'rain':
+        oscillator.frequency.value = 200;
+        gainNode.gain.value = 0.05;
+        break;
+      case 'crickets':
+        oscillator.frequency.value = 3000;
+        gainNode.gain.value = 0.03;
+        break;
+      case 'forest':
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.04;
+        break;
+      default:
+        oscillator.frequency.value = 440;
+        gainNode.gain.value = 0.1;
+    }
+    
+    oscillator.start();
+    return { oscillator, gainNode };
+  }
 
   function playSession(name, meta) {
+    // Stop current audio if playing
+    if (currentAudio) {
+      stopCurrentAudio();
+    }
+    
+    // Create new audio
+    currentAudio = createPlaceholderSound('meditation');
+    
+    // Update UI
     document.getElementById('playerBar').classList.add('visible');
     document.getElementById('playerName').textContent = name;
     document.getElementById('playerStatus').textContent = meta;
@@ -1306,11 +1362,32 @@
   }
 
   function playSound(card, icon, name) {
-    document.querySelectorAll('.sound-card').forEach(c => { c.classList.remove('playing'); const d = c.querySelector('.playing-dot'); if(d) d.remove(); });
+    // Stop current audio if playing
+    if (currentAudio) {
+      stopCurrentAudio();
+    }
+    
+    // Update visual state
+    document.querySelectorAll('.sound-card').forEach(c => { 
+      c.classList.remove('playing'); 
+      const d = c.querySelector('.playing-dot'); 
+      if(d) d.remove(); 
+    });
     card.classList.add('playing');
     const dot = document.createElement('div');
     dot.className = 'playing-dot';
     card.appendChild(dot);
+    
+    // Determine sound type based on name
+    let soundType = 'nature';
+    if (name.toLowerCase().includes('rain')) soundType = 'rain';
+    else if (name.toLowerCase().includes('cricket')) soundType = 'crickets';
+    else if (name.toLowerCase().includes('forest')) soundType = 'forest';
+    
+    // Create new audio
+    currentAudio = createPlaceholderSound(soundType);
+    
+    // Update UI
     document.getElementById('playerBar').classList.add('visible');
     document.getElementById('playerName').textContent = name;
     document.getElementById('playerStatus').textContent = 'Sleep soundscape';
@@ -1321,15 +1398,62 @@
     showToast(icon + ' Playing: ' + name);
   }
 
+  function stopCurrentAudio() {
+    if (currentAudio && currentAudio.oscillator) {
+      currentAudio.oscillator.stop();
+      currentAudio.oscillator.disconnect();
+      currentAudio.gainNode.disconnect();
+      currentAudio = null;
+    }
+  }
+
   function togglePlay() {
+    if (!currentAudio) {
+      // If no audio is loaded, play the first available sound
+      const firstSoundCard = document.querySelector('.sound-card');
+      if (firstSoundCard) {
+        firstSoundCard.click();
+      }
+      return;
+    }
+    
     isPlaying = !isPlaying;
+    
+    if (isPlaying) {
+      // Resume audio (create new oscillator since we can't resume stopped ones)
+      const name = document.getElementById('playerName').textContent;
+      const icon = document.getElementById('playerThumb').textContent;
+      
+      if (name.includes('Sleep soundscape')) {
+        // Find the currently playing sound card and replay it
+        const playingCard = document.querySelector('.sound-card.playing');
+        if (playingCard) {
+          const soundName = playingCard.querySelector('.sound-name').textContent;
+          playSound(playingCard, icon, soundName);
+        }
+      } else {
+        playSession(name, document.getElementById('playerStatus').textContent);
+      }
+    } else {
+      // Stop audio
+      stopCurrentAudio();
+    }
+    
     document.getElementById('playIcon').style.display = isPlaying ? 'none' : 'block';
     document.getElementById('pauseIcon').style.display = isPlaying ? 'block' : 'none';
   }
 
   function closePlayer() {
+    stopCurrentAudio();
     document.getElementById('playerBar').classList.remove('visible');
-    document.querySelectorAll('.sound-card').forEach(c => { c.classList.remove('playing'); const d = c.querySelector('.playing-dot'); if(d) d.remove(); });
+    document.querySelectorAll('.sound-card').forEach(c => { 
+      c.classList.remove('playing'); 
+      const d = c.querySelector('.playing-dot'); 
+      if(d) d.remove(); 
+    });
+    isPlaying = false;
+    document.getElementById('playIcon').style.display = 'block';
+    document.getElementById('pauseIcon').style.display = 'none';
   }
 
   // ─── Timer ────────────────────────────────────────────────
